@@ -1,0 +1,5 @@
+#ignore .tftstate and backup
+terraform.tfstate
+terraform.tfstate.backup
+
+.terraform/
