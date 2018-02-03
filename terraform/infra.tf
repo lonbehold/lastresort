@@ -231,6 +231,27 @@ resource "aws_security_group" "httpssh" {
   }
 }
 
+#security group for access to DB
+resource "aws_security_group" "db" {
+  name = "sgfordb"
+  vpc_id = "${var.vpc_id}"
+  description = "DB access from VPC network only"  
+
+  ingress {
+      from_port = 3306
+      to_port = 3306
+      protocol = "tcp"
+      cidr_blocks = ["172.30.0.0/16"]
+  }
+  
+  egress {
+      from_port = 0
+      to_port = 0
+      protocol = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 ###ec2 instances
 #bastion instance
 resource "aws_instance" "bastion" {
@@ -246,8 +267,8 @@ resource "aws_instance" "bastion" {
 	}
 }
 
-#1st web instance
-resource "aws_instance" "web1" {
+#web instance A
+resource "aws_instance" "weba" {
     ami = "ami-f2d3638a"
     instance_type = "t2.micro"
     subnet_id = "${aws_subnet.private_subnet_a.id}"
@@ -259,3 +280,34 @@ resource "aws_instance" "web1" {
 	}
 }
 
+#subnet group to reference private_b and private_c
+resource "aws_db_subnet_group" "subgroupbc" {
+    name = "main"
+    subnet_ids = ["${aws_subnet.private_subnet_b.id}", "${aws_subnet.private_subnet_c.id}"]
+    
+	tags {
+        Name = "My DB subnet group"
+    }
+}
+
+#rds instance
+resource "aws_db_instance" "default" {
+  allocated_storage    = 20
+  engine               = "mysql"
+  engine_version       = "5.6.37"
+  instance_class       = "db.t2.micro"
+  name                 = "mydb"
+  identifier           = "mysqldbforweb"
+  username             = "foo"
+  password             = "barbarbar"
+  db_subnet_group_name = "${aws_db_subnet_group.subgroupbc.id}"
+  vpc_security_group_ids = ["${aws_security_group.db.id}"]
+  multi_az = false
+  #final_snapshot_identifier = "test"
+  copy_tags_to_snapshot = false
+  skip_final_snapshot = true
+  
+  tags{
+	Name = "dbforweb"
+  }
+}
