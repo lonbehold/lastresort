@@ -223,6 +223,13 @@ resource "aws_security_group" "httpssh" {
       cidr_blocks = ["0.0.0.0/0"]
   }
   
+  ingress {
+      from_port = 443
+      to_port = 443
+      protocol = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+  }
+  
   egress {
       from_port = 0
       to_port = 0
@@ -271,7 +278,8 @@ resource "aws_instance" "bastion" {
 resource "aws_instance" "weba" {
     ami = "ami-f2d3638a"
     instance_type = "t2.micro"
-    subnet_id = "${aws_subnet.private_subnet_a.id}"
+    subnet_id = "${aws_subnet.public_subnet_b.id}"
+	associate_public_ip_address = false
 	vpc_security_group_ids = ["${aws_security_group.httpssh.id}"]
 	key_name = "lastresort"
 	
@@ -297,7 +305,7 @@ resource "aws_db_instance" "default" {
   engine_version       = "5.6.37"
   instance_class       = "db.t2.micro"
   name                 = "mydb"
-  identifier           = "mysqldbforweb"
+  identifier           = "sqldbforweb"
   username             = "foo"
   password             = "barbarbar"
   db_subnet_group_name = "${aws_db_subnet_group.subgroupbc.id}"

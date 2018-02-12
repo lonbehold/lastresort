@@ -1,0 +1,36 @@
+---
+
+#install files for webserver
+- hosts: localhost
+
+  tasks:
+  - name: Install latest version of apache
+    apt:
+        name: apache2
+        state: latest
+        
+  - name: Install latest version of mysql
+    apt:
+        name: mysql-server
+        state: latest
+        
+  - name: Install latest version of php and php support for mysql and apache
+    apt:
+        name: php, libapache2-mod-php, php-mcrypt, php-mysql
+        state: latest
+  
+  - name: Install latest version of php support for apache
+    apt:
+        name: libapache2-mod-php
+        state: latest
+        
+  - name: Install latest version of php-mcrypt
+    apt:
+        name: php-mcrypt
+        state: latest
+  
+  - name: Install latest version of php support for mysql
+    apt:
+        name: php-mysql
+        state: latest
+        
