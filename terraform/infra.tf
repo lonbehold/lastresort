@@ -26,7 +26,7 @@ resource "aws_eip" "ng" {
 #nat gateway
 resource "aws_nat_gateway" "natgw" {
     allocation_id = "${aws_eip.ng.id}"
-    subnet_id = "${aws_subnet.private_subnet_a.id}"
+    subnet_id = "${aws_subnet.public_subnet_a.id}"
 }
 
 ###creation of route tables
@@ -278,8 +278,9 @@ resource "aws_instance" "bastion" {
 resource "aws_instance" "weba" {
     ami = "ami-f2d3638a"
     instance_type = "t2.micro"
-    subnet_id = "${aws_subnet.public_subnet_b.id}"
+    subnet_id = "${aws_subnet.private_subnet_a.id}"
 	associate_public_ip_address = false
+	private_ip = "172.30.2.167"
 	vpc_security_group_ids = ["${aws_security_group.httpssh.id}"]
 	key_name = "lastresort"
 	
