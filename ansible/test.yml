@@ -1,13 +1,32 @@
 ---
 
 #install files for webserver
-- hosts: localhost
+- hosts: web
 
   tasks:
-  - name: Install latest version of apache, mysql, php, and php support for mysql and apache
+  - name: Install LAMP stack and git
+    become: true
     yum:
-        name: apache2, mysql-server, php, libapache2-mod-php, php-mcrypt, php-mysql
+        name: httpd24, php70, mysql56-server, php70-mysqlnd, git
         state: latest
-  
 
-        
+  - name: Create a directory for git repo
+    file:
+        path: /home/ec2-user/lastresort
+        state: directory
+
+  - git:
+        repo: https://github.com/lonbehold/lastresort.git
+        dest: /home/ec2-user/lastresort
+        clone: yes
+        update: yes
+
+#  - name: Login into db and create a table
+#    become: true
+#    mysql_db:
+#        login_host: sqldbforweb.cuc0twrqljlf.us-west-2.rds.amazonaws.com
+#        login_user: foo
+#        login_password: barbarbar
+#        login_port: 3306
+#        name: mydb
+#        state: import
