@@ -203,7 +203,7 @@ resource "aws_security_group" "ssh" {
   }
 }
 
-#security group to allow http and ssh access
+#security group to allow http and ssh access for web instances
 resource "aws_security_group" "httpssh" {
   name = "allowhttpssh"
   vpc_id = "${var.vpc_id}"
@@ -213,7 +213,7 @@ resource "aws_security_group" "httpssh" {
       from_port = 22
       to_port = 22
       protocol = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
+      cidr_blocks = ["172.30.0.0/16"]
   }
   
   ingress {
@@ -259,6 +259,34 @@ resource "aws_security_group" "db" {
   }
 }
 
+#sg for elb
+/*resource "aws_security_group" "sgforlb" {
+  name        = "lb-security-group"
+  vpc_id      = "${var.vpc_id}"
+  description = "Allow web incoming traffic to load balancer"
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}*/
+
 ###ec2 instances
 #bastion instance
 resource "aws_instance" "bastion" {
@@ -289,7 +317,21 @@ resource "aws_instance" "weba" {
 	}
 }
 
-#subnet group to reference private_b and private_c
+#web instance b
+/*resource "aws_instance" "webb" {
+    ami = "ami-f2d3638a"
+    instance_type = "t2.micro"
+    subnet_id = "${aws_subnet.private_subnet_b.id}"
+	associate_public_ip_address = false
+	vpc_security_group_ids = ["${aws_security_group.httpssh.id}"]
+	key_name = "lastresort"
+	
+	tags {
+		Name = "webserver-b"
+	}
+}*/
+
+#db subnet group to reference private_b and private_c
 resource "aws_db_subnet_group" "subgroupbc" {
     name = "main"
     subnet_ids = ["${aws_subnet.private_subnet_b.id}", "${aws_subnet.private_subnet_c.id}"]
@@ -320,3 +362,40 @@ resource "aws_db_instance" "default" {
 	Name = "dbforweb"
   }
 }
+
+#Load balancer for web instances
+/*resource "aws_elb" "lbforweb" {
+  name = "elb"
+  subnets = ["${aws_subnet.public_subnet_b.id}", "${aws_subnet.public_subnet_c.id}"]
+
+  listener {
+    instance_port = 80
+    instance_protocol = "http"
+    lb_port = 80
+    lb_protocol = "http"
+  }
+  
+  listener {
+    instance_port = 443
+    instance_protocol = "http"
+    lb_port = 443
+    lb_protocol = "https"
+  }
+
+  health_check {
+    healthy_threshold = 10
+    unhealthy_threshold = 2
+    timeout = 2
+    target = "HTTP:80/"
+    interval = 10
+  }
+
+  instances = ["${aws_instance.weba.id}", "${aws_instance.webb.id}"]
+  connection_draining = true
+  connection_draining_timeout = 300
+  security_groups = ["${aws_security_group.sgforlb.id}"]
+
+  tags {
+    Name = "myelb"
+  }
+}*/
