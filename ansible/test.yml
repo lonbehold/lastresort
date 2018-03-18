@@ -24,9 +24,9 @@
 #  - name: Login into db and create a table
 #    become: true
 #    mysql_db:
-#        login_host: sqldbforweb.cuc0twrqljlf.us-west-2.rds.amazonaws.com
-#        login_user: foo
-#        login_password: barbarbar
+#        login_host: 
+#        login_user: 
+#        login_password: 
 #        login_port: 3306
 #        name: mydb
 #        state: import
