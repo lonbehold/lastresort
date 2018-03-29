@@ -304,7 +304,7 @@ resource "aws_instance" "bastion" {
 
 #web instance A
 resource "aws_instance" "weba" {
-    ami = "ami-f2d3638a"
+    ami = "ami-7f43f307"
     instance_type = "t2.micro"
     subnet_id = "${aws_subnet.private_subnet_a.id}"
 	associate_public_ip_address = false
@@ -319,7 +319,7 @@ resource "aws_instance" "weba" {
 
 #web instance b
 /*resource "aws_instance" "webb" {
-    ami = "ami-f2d3638a"
+    ami = "ami-7f43f307"
     instance_type = "t2.micro"
     subnet_id = "${aws_subnet.private_subnet_b.id}"
 	associate_public_ip_address = false
