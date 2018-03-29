@@ -342,7 +342,7 @@ resource "aws_db_subnet_group" "subgroupbc" {
 }
 
 #rds instance
-resource "aws_db_instance" "default" {
+resource "aws_db_instance" "mysqldb" {
   allocated_storage    = 20
   engine               = "mysql"
   engine_version       = "5.6.37"
@@ -380,6 +380,7 @@ resource "aws_db_instance" "default" {
     instance_protocol = "http"
     lb_port = 443
     lb_protocol = "https"
+	ssl_certificate_id = "lastresort"
   }
 
   health_check {
