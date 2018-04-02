@@ -1,7 +1,7 @@
 # Add your VPC ID to default below
 variable "vpc_id" {
   description = "VPC ID for usage throughout the build process"
-  default = "vpc-f6917c8f"
+  default = "vpc-25a3305c"
 }
 
 provider "aws" {
@@ -60,7 +60,7 @@ resource "aws_route_table" "private_routing_table" {
 #public subneta
 resource "aws_subnet" "public_subnet_a" {
     vpc_id = "${var.vpc_id}"
-    cidr_block = "172.30.1.0/24"
+    cidr_block = "172.31.1.0/24"
     availability_zone = "us-west-2a"
 
     tags {
@@ -71,7 +71,7 @@ resource "aws_subnet" "public_subnet_a" {
 #public subnetb
 resource "aws_subnet" "public_subnet_b" {
     vpc_id = "${var.vpc_id}"
-    cidr_block = "172.30.3.0/24"
+    cidr_block = "172.31.3.0/24"
     availability_zone = "us-west-2b"
 
     tags {
@@ -82,7 +82,7 @@ resource "aws_subnet" "public_subnet_b" {
 #public subnetc
 resource "aws_subnet" "public_subnet_c" {
     vpc_id = "${var.vpc_id}"
-    cidr_block = "172.30.5.0/24"
+    cidr_block = "172.31.5.0/24"
     availability_zone = "us-west-2c"
 
     tags {
@@ -93,7 +93,7 @@ resource "aws_subnet" "public_subnet_c" {
 #private subneta
 resource "aws_subnet" "private_subnet_a" {
     vpc_id = "${var.vpc_id}"
-    cidr_block = "172.30.2.0/24"
+    cidr_block = "172.31.2.0/24"
     availability_zone = "us-west-2a"
 
     tags {
@@ -104,7 +104,7 @@ resource "aws_subnet" "private_subnet_a" {
 #private subnetb
 resource "aws_subnet" "private_subnet_b" {
     vpc_id = "${var.vpc_id}"
-    cidr_block = "172.30.4.0/24"
+    cidr_block = "172.31.4.0/24"
     availability_zone = "us-west-2b"
 
     tags {
@@ -115,7 +115,7 @@ resource "aws_subnet" "private_subnet_b" {
 #private subnetc
 resource "aws_subnet" "private_subnet_c" {
     vpc_id = "${var.vpc_id}"
-    cidr_block = "172.30.6.0/24"
+    cidr_block = "172.31.6.0/24"
     availability_zone = "us-west-2c"
 
     tags {
@@ -213,7 +213,7 @@ resource "aws_security_group" "httpssh" {
       from_port = 22
       to_port = 22
       protocol = "tcp"
-      cidr_blocks = ["172.30.0.0/16"]
+      cidr_blocks = ["172.31.0.0/16"]
   }
   
   ingress {
@@ -259,8 +259,70 @@ resource "aws_security_group" "db" {
   }
 }
 
+###ec2 instances
+#bastion instance
+resource "aws_instance" "bastion" {
+    ami = "ami-1ee65166"
+    instance_type = "t2.micro"
+    subnet_id = "${aws_subnet.public_subnet_a.id}"
+	associate_public_ip_address = true
+	vpc_security_group_ids = ["${aws_security_group.ssh.id}"]
+	key_name = "test"
+	
+	tags{
+		Name = "bastion"
+	}
+}
+
+#web instance A
+resource "aws_instance" "weba" {
+    ami = "ami-d874e0a0"
+    instance_type = "t2.micro"
+    subnet_id = "${aws_subnet.private_subnet_a.id}"
+	associate_public_ip_address = false
+	private_ip = "172.31.2.167"
+	vpc_security_group_ids = ["${aws_security_group.httpssh.id}"]
+	key_name = "test"
+	
+	tags {
+		Name = "webserver-a"
+	}
+}
+
+#db subnet group to reference private_a and private_b
+resource "aws_db_subnet_group" "subgroupab" {
+    name = "test"
+    subnet_ids = ["${aws_subnet.private_subnet_a.id}", "${aws_subnet.private_subnet_b.id}"]
+    
+	tags {
+        Name = "My DB subnet group 2"
+    }
+}
+
+#rds instance
+resource "aws_db_instance" "mysqldb" {
+  allocated_storage    = 20
+  engine               = "mysql"
+  engine_version       = "5.6.37"
+  instance_class       = "db.t2.micro"
+  name                 = "mydb"
+  identifier           = "sqldbforweb2"
+  username             = "foo"
+  password             = "barbarbar"
+  db_subnet_group_name = "${aws_db_subnet_group.subgroupab.id}"
+  vpc_security_group_ids = ["${aws_security_group.db.id}"]
+  multi_az = false
+  #final_snapshot_identifier = "test"
+  copy_tags_to_snapshot = false
+  skip_final_snapshot = true
+  
+  tags{
+	Name = "dbforweb"
+  }
+}
+
 #sg for elb
-/*resource "aws_security_group" "sgforlb" {
+resource "aws_security_group" "sgforlb" {
   name        = "lb-security-group"
   vpc_id      = "${var.vpc_id}"
   description = "Allow web incoming traffic to load balancer"
@@ -285,86 +347,24 @@ resource "aws_security_group" "db" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-}*/
-
-###ec2 instances
-#bastion instance
-resource "aws_instance" "bastion" {
-    ami = "ami-1ee65166"
-    instance_type = "t2.micro"
-    subnet_id = "${aws_subnet.public_subnet_a.id}"
-	associate_public_ip_address = true
-	vpc_security_group_ids = ["${aws_security_group.ssh.id}"]
-	key_name = "lastresort"
-	
-	tags{
-		Name = "bastion"
-	}
-}
-
-#web instance A
-resource "aws_instance" "weba" {
-    ami = "ami-7f43f307"
-    instance_type = "t2.micro"
-    subnet_id = "${aws_subnet.private_subnet_a.id}"
-	associate_public_ip_address = false
-	private_ip = "172.30.2.167"
-	vpc_security_group_ids = ["${aws_security_group.httpssh.id}"]
-	key_name = "lastresort"
-	
-	tags {
-		Name = "webserver-a"
-	}
 }
 
 #web instance b
-/*resource "aws_instance" "webb" {
-    ami = "ami-7f43f307"
+resource "aws_instance" "webb" {
+    ami = "ami-d874e0a0"
     instance_type = "t2.micro"
     subnet_id = "${aws_subnet.private_subnet_b.id}"
 	associate_public_ip_address = false
 	vpc_security_group_ids = ["${aws_security_group.httpssh.id}"]
-	key_name = "lastresort"
+	key_name = "test"
 	
 	tags {
 		Name = "webserver-b"
 	}
-}*/
-
-#db subnet group to reference private_b and private_c
-resource "aws_db_subnet_group" "subgroupbc" {
-    name = "main"
-    subnet_ids = ["${aws_subnet.private_subnet_b.id}", "${aws_subnet.private_subnet_c.id}"]
-    
-	tags {
-        Name = "My DB subnet group"
-    }
-}
-
-#rds instance
-resource "aws_db_instance" "mysqldb" {
-  allocated_storage    = 20
-  engine               = "mysql"
-  engine_version       = "5.6.37"
-  instance_class       = "db.t2.micro"
-  name                 = "mydb"
-  identifier           = "sqldbforweb"
-  username             = "foo"
-  password             = "barbarbar"
-  db_subnet_group_name = "${aws_db_subnet_group.subgroupbc.id}"
-  vpc_security_group_ids = ["${aws_security_group.db.id}"]
-  multi_az = false
-  #final_snapshot_identifier = "test"
-  copy_tags_to_snapshot = false
-  skip_final_snapshot = true
-  
-  tags{
-	Name = "dbforweb"
-  }
 }
 
 #Load balancer for web instances
-/*resource "aws_elb" "lbforweb" {
+resource "aws_elb" "lbforweb" {
   name = "elb"
   subnets = ["${aws_subnet.public_subnet_b.id}", "${aws_subnet.public_subnet_c.id}"]
 
@@ -380,7 +380,7 @@ resource "aws_db_instance" "mysqldb" {
     instance_protocol = "http"
     lb_port = 443
     lb_protocol = "https"
-	ssl_certificate_id = "lastresort"
+	ssl_certificate_id = "arn:aws:acm:us-west-2:657452910646:certificate/34cfeed7-00f0-4001-98e3-875d3bc658ac"
   }
 
   health_check {
@@ -399,4 +399,4 @@ resource "aws_db_instance" "mysqldb" {
   tags {
     Name = "myelb"
   }
-}*/
+}
