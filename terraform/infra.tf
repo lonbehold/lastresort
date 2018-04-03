@@ -366,7 +366,7 @@ resource "aws_instance" "webb" {
 #Load balancer for web instances
 resource "aws_elb" "lbforweb" {
   name = "elb"
-  subnets = ["${aws_subnet.public_subnet_b.id}", "${aws_subnet.public_subnet_c.id}"]
+  subnets = ["${aws_subnet.public_subnet_a.id}", "${aws_subnet.public_subnet_b.id}"]
 
   listener {
     instance_port = 80
@@ -380,7 +380,7 @@ resource "aws_elb" "lbforweb" {
     instance_protocol = "http"
     lb_port = 443
     lb_protocol = "https"
-	ssl_certificate_id = "arn:aws:acm:us-west-2:657452910646:certificate/34cfeed7-00f0-4001-98e3-875d3bc658ac"
+    ssl_certificate_id = "arn:aws:acm:us-west-2:657452910646:certificate/34cfeed7-00f0-4001-98e3-875d3bc658ac"
   }
 
   health_check {
@@ -393,7 +393,7 @@ resource "aws_elb" "lbforweb" {
 
   instances = ["${aws_instance.weba.id}", "${aws_instance.webb.id}"]
   connection_draining = true
-  connection_draining_timeout = 300
+  connection_draining_timeout = 60
   security_groups = ["${aws_security_group.sgforlb.id}"]
 
   tags {
