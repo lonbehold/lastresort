@@ -28,6 +28,12 @@
         dest: /var/www/html
         remote_src: true
 
+  - name: unzip sql dump
+    unarchive:
+        src: /home/ec2-user/lastresort/mydbdump.zip
+        dest: /home/ec2-user/lastresort
+        remote_src: true
+
 #  - name: Login into db and create a table
 #    become: true
 #    mysql_db:
