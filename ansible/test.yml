@@ -9,6 +9,13 @@
     yum:
         name: httpd24, php70, mysql56-server, php70-mysqlnd, git
         state: latest
+        
+  - name: start httpd service
+    become: true
+    service:
+        name: httpd
+        enabled: true
+        state: started
 
   - name: Create a directory for git repo
     file:
