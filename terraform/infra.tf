@@ -280,7 +280,7 @@ resource "aws_instance" "weba" {
     instance_type = "t2.micro"
     subnet_id = "${aws_subnet.private_subnet_a.id}"
 	associate_public_ip_address = false
-	private_ip = "172.31.2.167"
+	#private_ip = "172.31.2.167"
 	vpc_security_group_ids = ["${aws_security_group.httpssh.id}"]
 	key_name = "test"
 	
@@ -376,11 +376,11 @@ resource "aws_elb" "lbforweb" {
   }
   
   listener {
-    instance_port = 443
+    instance_port = 80
     instance_protocol = "http"
     lb_port = 443
     lb_protocol = "https"
-    ssl_certificate_id = "arn:aws:acm:us-west-2:657452910646:certificate/34cfeed7-00f0-4001-98e3-875d3bc658ac"
+    ssl_certificate_id = "arn:aws:acm:us-west-2:657452910646:certificate/0877b3c4-422d-4bde-8b0e-881aac415aff"
   }
 
   health_check {
@@ -398,5 +398,33 @@ resource "aws_elb" "lbforweb" {
 
   tags {
     Name = "myelb"
+  }
+}
+
+resource "aws_route53_zone" "primary" {
+  name         = "evildrporkchop.bid"
+}
+
+resource "aws_route53_record" "www" {
+  zone_id = "${aws_route53_zone.primary.zone_id}"
+  name    = "www.${aws_route53_zone.primary.name}"
+  type    = "A"
+
+  alias {
+    name                   = "dualstack.${aws_elb.lbforweb.dns_name}"
+    zone_id                = "${aws_elb.lbforweb.zone_id}"
+    evaluate_target_health = true
+  }
+}
+
+resource "aws_route53_record" "default" {
+  zone_id = "${aws_route53_zone.primary.zone_id}"
+  name    = "${aws_route53_zone.primary.name}"
+  type    = "A"
+
+  alias {
+    name                   = "dualstack.${aws_elb.lbforweb.dns_name}"
+    zone_id                = "${aws_elb.lbforweb.zone_id}"
+    evaluate_target_health = true
   }
 }
