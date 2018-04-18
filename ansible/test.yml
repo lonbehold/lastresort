@@ -38,15 +38,15 @@
   - name: unzip sql dump
     unarchive:
         src: /home/ec2-user/lastresort/mydbdump.zip
-        dest: /home/ec2-user/lastresort
+        dest: /home/ec2-user/
         remote_src: true
 
-#  - name: Login into db and create a table
-#    become: true
-#    mysql_db:
-#        login_host: 
-#        login_user: 
-#        login_password: 
-#        login_port: 3306
-#        name: mydb
-#        state: import
+  - name: Login into db and import table
+    become: true
+    mysql_db:
+        login_host: sqldbforweb2.cuc0twrqljlf.us-west-2.rds.amazonaws.com
+        login_user: foo
+        login_password: barbarbar
+        name: mydbdump
+        target: /home/ec2-user/mydbdump
+        state: import
