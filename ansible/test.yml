@@ -7,7 +7,7 @@
   - name: Install LAMP stack and git
     become: true
     yum:
-        name: httpd24, php70, mysql56-server, php70-mysqlnd, git
+        name: httpd24, php70, mysql56-server, php70-mysqlnd, MYSQL-python, git
         state: latest
         
   - name: start httpd service
