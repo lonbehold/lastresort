@@ -10,9 +10,9 @@
         dest: /home/ubuntu/
         remote_src: true
         
-   - name: Login into db and import table
-     become: true
-     mysql_db:
+  - name: Login into db and import table
+    become: true
+    mysql_db:
         login_host: sqldbforweb2.cuc0twrqljlf.us-west-2.rds.amazonaws.com
         login_user: foo
         login_password: barbarbar
