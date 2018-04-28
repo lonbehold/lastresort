@@ -4,12 +4,6 @@
 - hosts: localhost
 
   tasks:
-  - name: install unzip and python-mysqldb which are required to import dump
-    apt:
-    become: true
-        name: unzip, mysqldb, mysql-server
-        state: latest
-    
   - name: unzip sql dump
     unarchive:
         src: /home/ubuntu/lastresort/mydbdump.zip
