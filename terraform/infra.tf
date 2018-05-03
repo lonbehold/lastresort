@@ -308,7 +308,7 @@ resource "aws_db_instance" "mysqldb" {
   name                 = "mydb"
   identifier           = "sqldbforweb2"
   username             = "foo"
-  password             = "barbarbar"
+  password             = "$(var.password)"
   db_subnet_group_name = "${aws_db_subnet_group.subgroupab.id}"
   vpc_security_group_ids = ["${aws_security_group.db.id}"]
   multi_az = false
