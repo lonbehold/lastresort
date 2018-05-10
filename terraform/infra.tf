@@ -295,7 +295,7 @@ resource "aws_db_subnet_group" "subgroupab" {
     subnet_ids = ["${aws_subnet.private_subnet_a.id}", "${aws_subnet.private_subnet_b.id}"]
     
 	tags {
-        Name = "My DB subnet group 2"
+        Name = "My DB subnet group"
     }
 }
 
@@ -308,7 +308,7 @@ resource "aws_db_instance" "mysqldb" {
   name                 = "mydb"
   identifier           = "sqldbforweb2"
   username             = "foo"
-  password             = "barbarbar"
+  password             = "${var.password}"
   db_subnet_group_name = "${aws_db_subnet_group.subgroupab.id}"
   vpc_security_group_ids = ["${aws_security_group.db.id}"]
   multi_az = false
@@ -398,5 +398,33 @@ resource "aws_elb" "lbforweb" {
 
   tags {
     Name = "myelb"
+  }
+}
+
+resource "aws_route53_zone" "primary" {
+  name         = "lastresort.space"
+}
+
+resource "aws_route53_record" "www" {
+  zone_id = "${aws_route53_zone.primary.zone_id}"
+  name    = "www.${aws_route53_zone.primary.name}"
+  type    = "A"
+
+  alias {
+    name                   = "dualstack.${aws_elb.lbforweb.dns_name}"
+    zone_id                = "${aws_elb.lbforweb.zone_id}"
+    evaluate_target_health = true
+  }
+}
+
+resource "aws_route53_record" "default" {
+  zone_id = "${aws_route53_zone.primary.zone_id}"
+  name    = "${aws_route53_zone.primary.name}"
+  type    = "A"
+
+  alias {
+    name                   = "dualstack.${aws_elb.lbforweb.dns_name}"
+    zone_id                = "${aws_elb.lbforweb.zone_id}"
+    evaluate_target_health = true
   }
 }
