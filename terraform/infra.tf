@@ -248,7 +248,7 @@ resource "aws_security_group" "db" {
       from_port = 3306
       to_port = 3306
       protocol = "tcp"
-      cidr_blocks = ["172.30.0.0/16"]
+      cidr_blocks = ["172.31.0.0/16"]
   }
   
   egress {
@@ -306,7 +306,7 @@ resource "aws_db_instance" "mysqldb" {
   engine_version       = "5.6.37"
   instance_class       = "db.t2.micro"
   name                 = "mydb"
-  identifier           = "sqldbforweb2"
+  identifier           = "sqldbforweb"
   username             = "foo"
   password             = "${var.password}"
   db_subnet_group_name = "${aws_db_subnet_group.subgroupab.id}"
@@ -380,7 +380,7 @@ resource "aws_elb" "lbforweb" {
     instance_protocol = "http"
     lb_port = 443
     lb_protocol = "https"
-	ssl_certificate_id = "arn:aws:acm:us-west-2:657452910646:certificate/34cfeed7-00f0-4001-98e3-875d3bc658ac"
+	ssl_certificate_id = "arn:aws:acm:us-west-2:657452910646:certificate/0d5c1360-4ff2-41e7-9f38-d59af3fe955f"
   }
 
   health_check {
