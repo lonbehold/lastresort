@@ -16,8 +16,8 @@
     unarchive:
         src: /home/ubuntu/lastresort/onlinestore.zip
         dest: /home/ubuntu/
-        remote_src: true		
-        
+        remote_src: true
+		
   - name: Login into db and import db
     become: true
     mysql_db:
