@@ -6,13 +6,19 @@
   - secrets.yml
 
   tasks:
-  - name: unzip sql dump
+  - name: unzip mydbdump
     unarchive:
         src: /home/ubuntu/lastresort/mydbdump.zip
         dest: /home/ubuntu/
         remote_src: true
+		
+  - name: unzip onlinestoredb
+    unarchive:
+        src: /home/ubuntu/lastresort/onlinestore.zip
+        dest: /home/ubuntu/
+        remote_src: true		
         
-  - name: Login into db and import table
+  - name: Login into db and import db
     become: true
     mysql_db:
         login_host: sqldbforweb.cuc0twrqljlf.us-west-2.rds.amazonaws.com
@@ -21,3 +27,13 @@
         state: import
         name: mydb
         target: /home/ubuntu/mydbdump
+		
+  - name: Login into db and import db
+    become: true
+    mysql_db:
+        login_host: sqldbforweb.cuc0twrqljlf.us-west-2.rds.amazonaws.com
+        login_user: foo
+        login_password: "{{ db_password }}"
+        state: import
+        name: mydb
+        target: /home/ubuntu/onlinestore
