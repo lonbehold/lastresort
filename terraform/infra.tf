@@ -248,7 +248,7 @@ resource "aws_security_group" "db" {
       from_port = 3306
       to_port = 3306
       protocol = "tcp"
-      cidr_blocks = ["172.30.0.0/16"]
+      cidr_blocks = ["172.31.0.0/16"]
   }
   
   egress {
@@ -306,7 +306,7 @@ resource "aws_db_instance" "mysqldb" {
   engine_version       = "5.6.37"
   instance_class       = "db.t2.micro"
   name                 = "mydb"
-  identifier           = "sqldbforweb2"
+  identifier           = "sqldbforweb"
   username             = "foo"
   password             = "${var.password}"
   db_subnet_group_name = "${aws_db_subnet_group.subgroupab.id}"
