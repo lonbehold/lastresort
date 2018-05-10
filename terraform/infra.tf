@@ -80,7 +80,7 @@ resource "aws_subnet" "public_subnet_b" {
 }
 
 #public subnetc
-resource "aws_subnet" "public_subnet_c" {
+/*resource "aws_subnet" "public_subnet_c" {
     vpc_id = "${var.vpc_id}"
     cidr_block = "172.31.5.0/24"
     availability_zone = "us-west-2c"
@@ -88,7 +88,7 @@ resource "aws_subnet" "public_subnet_c" {
     tags {
         Name = "public_c"
     }
-}
+}*/
 
 #private subneta
 resource "aws_subnet" "private_subnet_a" {
@@ -113,7 +113,7 @@ resource "aws_subnet" "private_subnet_b" {
 }
 
 #private subnetc
-resource "aws_subnet" "private_subnet_c" {
+/*resource "aws_subnet" "private_subnet_c" {
     vpc_id = "${var.vpc_id}"
     cidr_block = "172.31.6.0/24"
     availability_zone = "us-west-2c"
@@ -121,7 +121,7 @@ resource "aws_subnet" "private_subnet_c" {
     tags {
         Name = "private_c"
     }
-}
+}*/
 
 ###subnet associations of public and private subnets
 #associate public subneta with public route table
@@ -155,10 +155,10 @@ resource "aws_route_table_association" "private_subnet_b_rt_assoc" {
 }
 
 #associate private subnetc with public route table
-resource "aws_route_table_association" "private_subnet_c_rt_assoc" {
+/*resource "aws_route_table_association" "private_subnet_c_rt_assoc" {
     subnet_id = "${aws_subnet.private_subnet_c.id}"
     route_table_id = "${aws_route_table.private_routing_table.id}"
-}
+}*/
 
 ###security groups
 #security group to allow http access
@@ -248,7 +248,7 @@ resource "aws_security_group" "db" {
       from_port = 3306
       to_port = 3306
       protocol = "tcp"
-      cidr_blocks = ["172.31.0.0/16"]
+      cidr_blocks = ["172.30.0.0/16"]
   }
   
   egress {
@@ -280,7 +280,7 @@ resource "aws_instance" "weba" {
     instance_type = "t2.micro"
     subnet_id = "${aws_subnet.private_subnet_a.id}"
 	associate_public_ip_address = false
-	#private_ip = "172.31.2.167"
+	private_ip = "172.31.2.167"
 	vpc_security_group_ids = ["${aws_security_group.httpssh.id}"]
 	key_name = "test"
 	
@@ -308,7 +308,7 @@ resource "aws_db_instance" "mysqldb" {
   name                 = "mydb"
   identifier           = "sqldbforweb2"
   username             = "foo"
-  password             = "$(var.password)"
+  password             = "barbarbar"
   db_subnet_group_name = "${aws_db_subnet_group.subgroupab.id}"
   vpc_security_group_ids = ["${aws_security_group.db.id}"]
   multi_az = false
@@ -376,11 +376,11 @@ resource "aws_elb" "lbforweb" {
   }
   
   listener {
-    instance_port = 80
+    instance_port = 443
     instance_protocol = "http"
     lb_port = 443
     lb_protocol = "https"
-    ssl_certificate_id = "arn:aws:acm:us-west-2:657452910646:certificate/a0b5b6c3-6890-4209-8ae0-a1f5aefe346a"
+	ssl_certificate_id = "arn:aws:acm:us-west-2:657452910646:certificate/34cfeed7-00f0-4001-98e3-875d3bc658ac"
   }
 
   health_check {
@@ -393,38 +393,10 @@ resource "aws_elb" "lbforweb" {
 
   instances = ["${aws_instance.weba.id}", "${aws_instance.webb.id}"]
   connection_draining = true
-  connection_draining_timeout = 60
+  connection_draining_timeout = 300
   security_groups = ["${aws_security_group.sgforlb.id}"]
 
   tags {
     Name = "myelb"
-  }
-}
-
-resource "aws_route53_zone" "primary" {
-  name         = "evildrporkchop.bid"
-}
-
-resource "aws_route53_record" "www" {
-  zone_id = "${aws_route53_zone.primary.zone_id}"
-  name    = "www.${aws_route53_zone.primary.name}"
-  type    = "A"
-
-  alias {
-    name                   = "dualstack.${aws_elb.lbforweb.dns_name}"
-    zone_id                = "${aws_elb.lbforweb.zone_id}"
-    evaluate_target_health = true
-  }
-}
-
-resource "aws_route53_record" "default" {
-  zone_id = "${aws_route53_zone.primary.zone_id}"
-  name    = "${aws_route53_zone.primary.name}"
-  type    = "A"
-
-  alias {
-    name                   = "dualstack.${aws_elb.lbforweb.dns_name}"
-    zone_id                = "${aws_elb.lbforweb.zone_id}"
-    evaluate_target_health = true
   }
 }
