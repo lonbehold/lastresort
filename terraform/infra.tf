@@ -137,10 +137,10 @@ resource "aws_route_table_association" "public_subnet_b_rt_assoc" {
 }
 
 #associate public subnetc with public route table
-resource "aws_route_table_association" "public_subnet_c_rt_assoc" {
+/*resource "aws_route_table_association" "public_subnet_c_rt_assoc" {
     subnet_id = "${aws_subnet.public_subnet_c.id}"
     route_table_id = "${aws_route_table.public_routing_table.id}"
-}
+}*/
 
 #associate private subneta with public route table
 resource "aws_route_table_association" "private_subnet_a_rt_assoc" {
