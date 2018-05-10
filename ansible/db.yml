@@ -35,5 +35,5 @@
         login_user: foo
         login_password: "{{ db_password }}"
         state: import
-        name: mydb
-        target: /home/ubuntu/onlinestore
+        name: onlinestore
+        target: /home/ubuntu/onlinestoredump
