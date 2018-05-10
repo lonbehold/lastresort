@@ -380,7 +380,7 @@ resource "aws_elb" "lbforweb" {
     instance_protocol = "http"
     lb_port = 443
     lb_protocol = "https"
-	ssl_certificate_id = "arn:aws:acm:us-west-2:657452910646:certificate/0d5c1360-4ff2-41e7-9f38-d59af3fe955f"
+	ssl_certificate_id = "arn:aws:acm:us-west-2:657452910646:certificate/f9d66d89-8cb9-4fe7-a3d0-bc7c7f0f6b06"
   }
 
   health_check {
