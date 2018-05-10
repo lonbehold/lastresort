@@ -27,7 +27,7 @@
         state: import
         name: mydb
         target: /home/ubuntu/mydbdump
-		
+
   - name: Login into db and import db
     become: true
     mysql_db:
